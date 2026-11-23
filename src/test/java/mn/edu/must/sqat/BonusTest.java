@@ -67,4 +67,14 @@ class BonusTest {
         // present 5 < 6 -> 51 алгасагдана, 49-ийн score = 0 нь 54-т хэрэглэгдэнэ
         assertEquals(3, DataFlowTargets.bonus(new int[]{1, 1, 1, 1, 1}, 6));
     }
+
+    // ---------- Хэсэг C: M2 (best = present)-ийг унагах тест ----------
+
+    @Test
+    @DisplayName("D9 [1,1,1,0,1,1] thr=5 -> 5: present=5 but longest streak=3 (kills M2)")
+    void bonus_brokenStreak_present5_longestStreak3_is5() {
+        // Урт цуваа дунд нь тасарна: ирсэн өдөр 5 (>= 5) боловч хамгийн урт цуваа 3 (< 5).
+        // best = present гэж буруу хувьсагч ашиглавал best = 5 болж 8 буцаана.
+        assertEquals(5, DataFlowTargets.bonus(new int[]{1, 1, 1, 0, 1, 1}, 5));
+    }
 }
