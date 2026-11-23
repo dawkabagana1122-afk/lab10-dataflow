@@ -238,11 +238,13 @@ JaCoCo салаа бүрийг тусад нь тоолдог бөгөөд def �
 
 DU хамралт нь «def-ээс use хүрэх зам дайрагдсан» гэдгийг л баталдаг. Use-д хүрсэн **утга** гаралтыг өөрчилж буй эсэх, буруу хувьсагч (present) зөв хувьсагчтай (streak) тухайн оролтод давхцаж байгаа эсэхийг шалгадаггүй. Тиймээс **D9** (`[1,1,1,0,1,1]`, thr=5) нэмсэн: present = 5 боловч хамгийн урт цуваа 3. Зөв код 5 буцаана, M2 нь best = present = 5 ≥ 5 болж 8 буцаана.
 
-**M3 яагаад ямар ч тест унагаагүй вэ?** `total` тодорхойлогдсон ч хаана ч хэрэглэгдээгүй. Энэ нь use-гүй «def → төгсгөл» гажилт бөгөөд гаралтад нөлөөлөхгүй тул ямар ч динамик тест (assert) үүнийг илрүүлэх боломжгүй. `javac` ч анхааруулдаггүй, учир нь ашиглагдаагүй локал хувьсагч Java хэлний дүрмээр алдаа биш. Үүнийг **статик анализ** барина: IDE-ийн compiler/linter (Eclipse JDT, IntelliJ inspection), SpotBugs (`DLS_DEAD_LOCAL_STORE`), PMD (`UnusedLocalVariable`), SonarLint зэрэг. VS Code-ын Java өргөтгөл (Eclipse JDT) `int total = present + best;` мөрийг ингэж анхааруулсан:
+**M3 яагаад ямар ч тест унагаагүй вэ?** `total` тодорхойлогдсон ч хаана ч хэрэглэгдээгүй. Энэ нь use-гүй «def → төгсгөл» гажилт бөгөөд гаралтад нөлөөлөхгүй тул ямар ч динамик тест (assert) үүнийг илрүүлэх боломжгүй. `javac` ч анхааруулдаггүй, учир нь ашиглагдаагүй локал хувьсагч Java хэлний дүрмээр алдаа биш. Үүнийг **статик анализ** барина: IDE-ийн hint/inspection (Oracle Java / NetBeans, Eclipse JDT, IntelliJ), SpotBugs (`DLS_DEAD_LOCAL_STORE`), PMD (`UnusedLocalVariable`), SonarLint зэрэг. Миний VS Code дээр суусан **Oracle Java Platform** өргөтгөл (`oracle.oracle-java` 27.0.1, NetBeans-ийн Java hint-үүд дээр суурилсан) мөр 49-д нэмсэн `int total = present + best;`-ийг Problems самбарт ингэж анхааруулсан:
 
 ```
-The value of the local variable total is not used  Java(536870973)
+DataFlowTargets.java  49:13  Warning  Variable total is never read  hints(1)
 ```
+
+Энэ анхааруулга нь compile эсвэл тест ажиллуулахгүйгээр, зөвхөн кодын def/use урсгалыг статикаар шинжилж гарсан. Def байгаа ч use байхгүй гэдгийг илрүүлж байгаа нь DU анализыг IDE өөрөө автоматаар хийж байгаа хэрэг юм.
 
 ## Дүгнэлт
 
