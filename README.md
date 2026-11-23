@@ -221,7 +221,7 @@ JaCoCo салаа бүрийг тусад нь тоолдог бөгөөд def �
 
 ## Хэсэг C: Fault seeding
 
-Мутаци бүрийг `DataFlowTargets.java` дээр шууд хийж, `mvn test 2>&1 | tee results/mvn-test-M*.txt` ажиллуулсны дараа `git restore`-оор буцаасан. Аль ч мутацийг commit хийгээгүй. `git diff 44471fc HEAD -- src/main` хоосон байна.
+Мутаци бүрийг `DataFlowTargets.java` дээр шууд хийж, `mvn test 2>&1 | tee results/mvn-test-M*.txt` ажиллуулсны дараа `git restore`-оор буцаасан. Аль ч мутацийг commit хийгээгүй. `git diff 10be40d HEAD -- src/main` хоосон байна.
 
 | № | Мутаци | Төрөл | Үр дүн (`results/`) | Унасан тест ба expected/was |
 |---|---|---|---|---|
