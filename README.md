@@ -77,7 +77,7 @@ Starter-ийг (Teams → Lab10, `lab10-dataflow/`) өөрчлөлтгүй аш�
 
 ![bonus() CFG](cfg-bonus.png)
 
-`cfg-bonus.png` — зангилаа бүр файлын мөрийн дугаартай, ирмэг бүрт түүнийг дайрдаг тестийн нэр бичигдсэн. For-each давталтыг (38) нөхцөл = «attendance-д дараагийн элемент байгаа эсэх» (attendance-ийн p-use), алхам = «дараагийн элементийг a-д оноох» (a-ийн def) гэж задалсан.
+`cfg-bonus.png` (эх нь `cfg-bonus.dot`, Graphviz-ээр `dot -Tpng` гэж үүсгэсэн) — зангилаа бүр файлын мөрийн дугаартай, ирмэг бүрт түүнийг дайрдаг тестийн нэр бичигдсэн. For-each давталтыг (38) нөхцөл = «attendance-д дараагийн элемент байгаа эсэх» (attendance-ийн p-use), алхам = «дараагийн элементийг a-д оноох» (a-ийн def) гэж задалсан.
 
 | Зангилаа | Код | Ирмэгүүд |
 |---|---|---|
@@ -186,7 +186,7 @@ p-use-ийг гарах ирмэг тус бүрээр (T/F) тоолсон. Т�
 | D7 | `bonus_presentAbsentPresent_threshold2_is5` | `bonus([1,0,1], 2)` → 5 | №18, 26 |
 | D8 | `bonus_streak5_belowThreshold_is3` | `bonus([1,1,1,1,1], 6)` → 3 | №31 |
 
-Шат 2-ын дараа `mvn verify`: Tests run: **11** (GcdTest 3 + BonusTest 8), Branch 16/16. Эцсийн тоог B5-д `results/`-ээс өгнө.
+Шат 2-ын дараа `mvn verify`: Tests run: **11** (GcdTest 3 + BonusTest 8), Branch 16/16. Эцсийн тоог (Хэсэг C-ийн D9 тест нэмэгдсэний дараах) B5-д `results/`-ээс өгнө.
 
 
 ### B4 — Шат 1: ALL-DEFS (2 тест)
@@ -201,3 +201,58 @@ p-use-ийг гарах ирмэг тус бүрээр (T/F) тоолсон. Т�
 `results/mvn-verify-alldefs.txt`: Tests run: **5** (GcdTest 3 + BonusTest 2), Failures: 0, BUILD SUCCESS.
 
 `results/jacoco-alldefs.csv`: `BRANCH_MISSED = 3`, `BRANCH_COVERED = 13` → Branch 13/16 = **81.25%**; `LINE_MISSED = 2`, `LINE_COVERED = 22` → Line 22/24. Хамрагдаагүй: 32-ын 2 салаа (`attendance == null` ба `threshold < 0` үнэн), 42-ын F салаа (`streak > best` худал), мөр 33 (`throw`) ба мөр 7 (далд constructor). **All-defs хангагдсан ч branch 100% биш** — all-defs нь def бүрийг нэг use-д хүргэхийг л шаарддаг тул алдааны зам болон p-use-ийн хоёр дахь салааг шалгахгүй орхиж болдог.
+
+### B5 — JaCoCo: all-defs ба эцсийн хамралт
+
+| Файл | Tests run | Branch | Line |
+|---|---|---|---|
+| `results/jacoco-alldefs.csv` (`mvn-verify-alldefs.txt`) | 5 | 13/16 (BRANCH_MISSED = 3) | 22/24 (LINE_MISSED = 2) |
+| `results/jacoco-final.csv` (`mvn-verify-final.txt`) | **12** (GcdTest 3 + BonusTest 9) | **16/16** (BRANCH_MISSED = 0) | 23/24 (LINE_MISSED = 1) |
+
+Эцсийн LINE_MISSED = 1 нь мөр 7: Java-гийн далд constructor `DataFlowTargets()`. Үүнийг хамруулах тест бичээгүй, кодыг ч өөрчлөөгүй.
+
+**All-defs хангагдсан ч branch 100% биш байж болох уу?** Болно. All-defs-ийн 2 тестийн дараа Branch 13/16 байсан (дээрх B4 Шат 1-ийг хар).
+
+**Branch 100% болсон ч DU хүснэгтэд хамрагдаагүй хос үлдэж болох уу?** Болно. Жишээ нь {D1, D2, D3, D4, D7} гэсэн 5 тест 16 салааг бүгдийг нь хамарна: 32 T/F (D3, D4 / бусад), 38 T/F, 39 T/F (D2), 42 T/F (D7), 50 T/F (D1 / D2), 53 T/F (D1 / D2). Гэхдээ эдгээр тестээр:
+- **№31 score(49) → 54** хамрагдахгүй. Энэ хос 50 **худал**, 53 **үнэн** байхыг зэрэг шаарддаг. D1-д 50 үнэн, D2-т 53 худал тул салаа тус бүр тусдаа дайрагдсан ч хослол нь дайрагдаагүй. Үүний тулд л D8 (`[1,1,1,1,1]`, thr=6 → 3) нэмсэн.
+- **№10, 11, 24** (present(35) → 50, best(37) → (53, F)) хамрагдахгүй. Эдгээр нь давталт огт ажиллаагүй үеийн def-үүд. D5 ба D6 (хоосон массив) хэрэгтэй.
+
+JaCoCo салаа бүрийг тусад нь тоолдог бөгөөд def → use хослолыг ХЭМЖДЭГГҮЙ. Тиймээс branch 16/16 нь all-DU-pairs-ийн нотолгоо биш.
+
+## Хэсэг C: Fault seeding
+
+Мутаци бүрийг `DataFlowTargets.java` дээр шууд хийж, `mvn test 2>&1 | tee results/mvn-test-M*.txt` ажиллуулсны дараа `git restore`-оор буцаасан. Аль ч мутацийг commit хийгээгүй. `git diff 44471fc HEAD -- src/main` хоосон байна.
+
+| № | Мутаци | Төрөл | Үр дүн (`results/`) | Унасан тест ба expected/was |
+|---|---|---|---|---|
+| M1 | `streak = streak + 1` (41) устгах | Missing update | **Баригдсан.** `mvn-test-M1.txt`: Tests run: 11, Failures: 2 | `BonusTest.bonus_fivePresentStreak5_threshold5_is8:21 expected: <8> but was: <5>`<br>`BonusTest.bonus_streak5_belowThreshold_is3:68 expected: <3> but was: <0>` |
+| M2 | `if (streak > best) best = streak;` → `best = present;` | Wrong variable | **Амьд үлдсэн.** `mvn-test-M2.txt`: Tests run: 11, Failures: 0 | — |
+| M2 + D9 | M2 хэвээр, D9 тест нэмсэн | — | **Баригдсан.** `mvn-test-M2-kill.txt`: Tests run: 12, Failures: 1 | `BonusTest.bonus_brokenStreak_present5_longestStreak3_is5:78 expected: <5> but was: <8>` |
+| M3 | Давталтын дараа `int total = present + best;` нэмэх | Dead definition | **Амьд үлдсэн** (хүлээгдэж байсан). `mvn-test-M3.txt`: Tests run: 12, Failures: 0 | — |
+
+**M1:** 41-ийн def устсанаар streak үргэлж 0 хэвээр үлдэнэ. Тиймээс `42: streak > best` хэзээ ч үнэн болохгүй, best = 0 болно. 53-ын T салааг шаарддаг D1, D8 хоёр шууд уналаа.
+
+**M2 яагаад бүх хос хамрагдсан атал баригдсангүй вэ?** Анхны 8 тестийн аль нэгэнд нь ч ирсэн өдөр ба одоогийн цуваа ялгаатай үед best шинэчлэгдэх (43) мөч байхгүй:
+- D1, D8 (`[1,1,1,1,1]`): тасалгаа байхгүй тул алхам бүрд present = streak.
+- D2 (`[0,1]`) ба D7 (`[1,0,1]`): эцсийн best нь 1 ба 2 болж өөрчлөгдсөн ч `best >= 5` (53) хоёуланд нь худал хэвээр тул score өөрчлөгдсөнгүй.
+
+DU хамралт нь «def-ээс use хүрэх зам дайрагдсан» гэдгийг л баталдаг. Use-д хүрсэн **утга** гаралтыг өөрчилж буй эсэх, буруу хувьсагч (present) зөв хувьсагчтай (streak) тухайн оролтод давхцаж байгаа эсэхийг шалгадаггүй. Тиймээс **D9** (`[1,1,1,0,1,1]`, thr=5) нэмсэн: present = 5 боловч хамгийн урт цуваа 3. Зөв код 5 буцаана, M2 нь best = present = 5 ≥ 5 болж 8 буцаана.
+
+**M3 яагаад ямар ч тест унагаагүй вэ?** `total` тодорхойлогдсон ч хаана ч хэрэглэгдээгүй. Энэ нь use-гүй «def → төгсгөл» гажилт бөгөөд гаралтад нөлөөлөхгүй тул ямар ч динамик тест (assert) үүнийг илрүүлэх боломжгүй. `javac` ч анхааруулдаггүй, учир нь ашиглагдаагүй локал хувьсагч Java хэлний дүрмээр алдаа биш. Үүнийг **статик анализ** барина: IDE-ийн compiler/linter (Eclipse JDT, IntelliJ inspection), SpotBugs (`DLS_DEAD_LOCAL_STORE`), PMD (`UnusedLocalVariable`), SonarLint зэрэг. VS Code-ын Java өргөтгөл (Eclipse JDT) `int total = present + best;` мөрийг ингэж анхааруулсан:
+
+```
+The value of the local variable total is not used  Java(536870973)
+```
+
+## Дүгнэлт
+
+DU анализ нь branch хамралтаас илүү нарийн шаардлага тавьдаг. Branch нь салаа бүрийг тусад нь тоолдог бол DU анализ нь def ба use-ийг холбосон бодит замуудыг шаарддаг. Үүний жишээ нь branch 16/16 байхад хамрагдахгүй үлдэж болох score(49) → 54 болон давталт ажиллаагүй үеийн present(35)/best(37)-ийн хосууд. Мөн kill-ийн шинжилгээ (46-ын `streak = 0`, 51/54-ийн score) нь логикийг гүнзгий ойлгоход хүргэсэн бөгөөд all-defs яагаад хамгийн багадаа 2 тест шаарддагийг баталж чадсан. Гэхдээ энэ нь үнэтэй: JaCoCo DU хамралтыг хэмждэггүй тул 35 хосыг, def-clear зам ба биелэшгүй хосын үндэслэлийг гараар гаргах шаардлагатай болсон. Fault seeding нь DU хамралтын хязгаарыг харуулсан. M1-ийг шууд барьсан ч M2 бүх хос хамрагдсан атал амьд үлдэж, утга давхцахгүй оролт (D9) нэмэх хэрэгтэй болсон. M3 шиг үхсэн def-ийг тест огт барихгүй тул статик анализ шаардлагатай. Хамгийн их цагийг B3 (bonus-ийн DU хүснэгт) авсан. Ялангуяа давталт доторх kill болон p-use-ийн T/F салаа тус бүрийн биелэх эсэхийг шалгахад их цаг зарцуулсан.
+
+## AI туслах ашигласан байдал
+
+Claude Code (AI туслах)-ийг Хэсэг C-ийн дараах ажилд ашигласан:
+- `cfg-bonus.dot`-ийг Graphviz-ээр бичиж `cfg-bonus.png` үүсгэх;
+- B5, Хэсэг C, Дүгнэлтийн хэсгийн текстийг `results/` файлуудын тоонд тулгуурлан ноороглох;
+- мутацийн дараа эх кодыг `git restore`-оор буцааж `mvn verify` (final) ажиллуулах.
+
+Бүх тоо (Tests run, Branch/Line, expected/was) `results/` дахь файлуудаас шууд авсан бөгөөд би өөрөө тулгаж шалгасан.
